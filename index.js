@@ -20,11 +20,49 @@ let watcher = chokidar.watch('file, dir, or glob', {
 });
 
 var log = console.log.bind(console);
-chokidar.watch('.', {ignored: /[\/\\]\./})
-.on('all', (event, path) => {
+chokidar.watch('.', {ignored: /[\/\\]\./}).on('all', (event, path) => 
+{
     console.log(event, path)
-    if (socketGlobal[0])
-    socketGlobal[0].write({event})
+    if (socketGlobal[0]){
+        let response = JSON.parse('{}')
+        let action =''
+        if(event=='add'){
+        	console.log("Added a new file with file path "+path)
+        	action='add'
+        }
+        else if(event=='addDir'){
+        	console.log("Added a new dir with file path "+path)
+        	action='addDir'
+
+        }
+        else if(event=='change'){
+        	console.log("changed a new dir with file path "+path)
+           action='change'
+
+        } 
+        else if(event=='unlinkDir'){
+        	console.log("changed a removed dir with file path "+path)
+        	 action='unlinkDir'
+
+        }
+        else if(event=='unlink'){
+        	console.log("changed a removed file with file path "+path)
+        	 action='unlink'
+
+
+        }
+        response.action=action
+        response.path=path
+
+
+        socketGlobal[0].write({
+                      // time of creation/deletion/update
+
+       "action" :action,"path":path
+                  }
+)
+
+   }
 })
 
 
