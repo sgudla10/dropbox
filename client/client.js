@@ -4,6 +4,8 @@ let path=require('path')
 let rimraf=require('rimraf')
 let fs=require('pn/fs')
 let request = require('request');
+require('songbird')
+
 
 
 
@@ -37,24 +39,28 @@ socket.on('data',function(data){
 
     }
     if(data.action=='unlink'){
-    	   fs.unlink(path.join(ROOT_DIR,data.path))
+    	   deleteFile(data.path)
     
     }  
-    if(data.action=='add'){
+    if(data.action=='add'||data.action=='change'){
     	request({
-    		url: 'https://modulus.io/contact/demo', //URL to hit
-    		qs: {from: 'blog example', time: +new Date()}, //Query string data
-    		method: 'POST',
-    		headers: {
-        		'Content-Type': 'MyContentType',
-        		'Custom-Header': 'Custom Value'
-    	},
-    	body: 'Hello Hello! String body!' //Set the body as a string
+    		url: "http://127.0.0.1:8001"/+data.path, //URL to hit
+    		method: 'GET',
+    		
 	}, function(error, response, body){
     	if(error) {
         	console.log(error);
    		 } else {
         	console.log(response.statusCode, body);
+
+        	let destination = fs.createWriteStream(path.join(ROOT_DIR,data.path));
+            console.log("file path: " + data.path)
+            fs.promise.truncate(path.join(ROOT_DIR,data.path),0)
+            request(url).pipe(destination)
+
+
+
+        	
     	}
 		});
     }
@@ -68,15 +74,23 @@ socket.on('data',function(data){
 
 
 
- async function createDir(path){
-	    console.log("createDir is being called "+path)
-		await mkdirp.promise(path.join(ROOT_DIR,path))
-		console.log("created the directory of path "+path.join(ROOT_DIR,path))
-	  
+ async function createDir(filepath){
+	   try { 
+	    console.log("createDir is being called "+filepath)
+		await mkdirp.promise(path.join(ROOT_DIR,filepath))
+		console.log("created the directory of path "+path.join(ROOT_DIR,filepath))
+	  }
+	  catch(e){
+	  	console.log(e.stack)
+	  }
 
 }
 
-function createFile(path){
+async function deleteFile(filepath){
+	
+		await fs.unlink(path.join(ROOT_DIR,filePath))
+	
+
 
 }
 
